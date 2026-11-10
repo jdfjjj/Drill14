@@ -1,3 +1,14 @@
+"""Frame-based flight animation and motion for the bird flock.
+
+The sheet has 14 frames arranged in five columns at 12 frames per second, so
+one wingbeat loop lasts about 1.17 seconds. The 183x168 source cells render at
+0.4 scale (about 73x67 pixels) for visibility on the 1600x600 game canvas.
+Using the game's 10 pixels per 0.3 meters, a 5 m/s cruising speed is about
+167 pixels per second; the flock varies that speed by +/-10 percent.
+"""
+
+from math import pi, sin
+
 import game_framework
 from pico2d import get_canvas_width, load_image
 
@@ -13,6 +24,7 @@ SPRITE_SCALE = 0.4
 PIXELS_PER_METER = 10.0 / 0.3
 FLIGHT_SPEED_MPS = 5.0
 FLIGHT_SPEED_PPS = FLIGHT_SPEED_MPS * PIXELS_PER_METER
+FLIGHT_BOB_AMPLITUDE = 3.0
 
 
 class Bird:
@@ -53,9 +65,13 @@ class Bird:
         source_y = int(
             (2 - row_from_top) * SPRITE_SHEET_HEIGHT / 3
         )
+        draw_y = self.y + FLIGHT_BOB_AMPLITUDE * sin(
+            2 * pi * self.frame / FRAME_COUNT
+        )
 
         Bird.image.clip_composite_draw(
             source_x, source_y, FRAME_WIDTH, FRAME_HEIGHT,
-            0, 'h' if self.direction < 0 else '', self.x, self.y,
+            0, 'h' if self.direction < 0 else '',
+            self.x, draw_y,
             FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE
         )
