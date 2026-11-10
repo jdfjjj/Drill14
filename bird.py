@@ -1,12 +1,3 @@
-"""Frame-based flight animation and motion for the bird flock.
-
-The sheet has 14 frames arranged in five columns at 12 frames per second, so
-one wingbeat loop lasts about 1.17 seconds. The 183x168 source cells render at
-0.4 scale (about 73x67 pixels) for visibility on the 1600x600 game canvas.
-Using the game's 10 pixels per 0.3 meters, a 5 m/s cruising speed is about
-167 pixels per second; the flock varies that speed by +/-10 percent.
-"""
-
 from math import pi, sin
 
 import game_framework
