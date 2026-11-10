@@ -1,5 +1,5 @@
 import game_framework
-from pico2d import load_image
+from pico2d import get_canvas_width, load_image
 
 
 SPRITE_SHEET_WIDTH = 918
@@ -10,23 +10,40 @@ FRAME_COLUMNS = 5
 FRAME_COUNT = 14
 FRAMES_PER_SECOND = 12.0
 SPRITE_SCALE = 0.4
+PIXELS_PER_METER = 10.0 / 0.3
+FLIGHT_SPEED_MPS = 5.0
+FLIGHT_SPEED_PPS = FLIGHT_SPEED_MPS * PIXELS_PER_METER
 
 
 class Bird:
     image = None
 
-    def __init__(self, x, y, frame=0):
+    def __init__(self, x, y, direction=1, frame=0, speed=FLIGHT_SPEED_PPS):
         if Bird.image is None:
             Bird.image = load_image('bird_animation.png')
 
         self.x = x
         self.y = y
+        self.direction = 1 if direction >= 0 else -1
+        self.speed = speed
         self.frame = frame % FRAME_COUNT
 
     def update(self):
         self.frame = (
             self.frame + FRAMES_PER_SECOND * game_framework.frame_time
         ) % FRAME_COUNT
+        self.x += self.direction * self.speed * game_framework.frame_time
+
+        half_width = FRAME_WIDTH * SPRITE_SCALE / 2
+        left_edge = half_width
+        right_edge = get_canvas_width() - half_width
+        while self.x < left_edge or self.x > right_edge:
+            if self.x < left_edge:
+                self.x = left_edge + (left_edge - self.x)
+                self.direction = 1
+            elif self.x > right_edge:
+                self.x = right_edge - (self.x - right_edge)
+                self.direction = -1
 
     def draw(self):
         frame_index = int(self.frame)
@@ -39,6 +56,6 @@ class Bird:
 
         Bird.image.clip_composite_draw(
             source_x, source_y, FRAME_WIDTH, FRAME_HEIGHT,
-            0, '', self.x, self.y,
+            0, 'h' if self.direction < 0 else '', self.x, self.y,
             FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE
         )
